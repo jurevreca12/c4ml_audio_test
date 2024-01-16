@@ -69,7 +69,7 @@ ________________________________________________________________________________
         frames = np.round(wave * 2047 * amplitude)
         
         sw_res = preproc_model(frames.reshape(1, num_frames, frame_length))
-        hw_res = preproc_circuit(frames, sim_timeout_sec=400)
+        hw_res = preproc_circuit(frames, sim_timeout_sec=600)
         assert np.allclose(
             sw_res.numpy().flatten(),
             hw_res.flatten(),
@@ -80,7 +80,7 @@ ________________________________________________________________________________
         os.makedirs(test_case_dir)
         matplotlib.image.imsave(os.path.join(test_case_dir, "sw_res.png"), sw_res.numpy().reshape(num_frames, num_mels))
         matplotlib.image.imsave(os.path.join(test_case_dir, "hw_res.png"), hw_res.reshape(num_frames, num_mels))
-
+        preproc_circuit.package(directory=test_case_dir)
 
 if __name__ == "__main__":
     main()
