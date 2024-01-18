@@ -1,5 +1,6 @@
 import os
 import logging
+import subprocess
 import itertools
 import qkeras
 import tensorflow as tf
@@ -81,6 +82,7 @@ ________________________________________________________________________________
         matplotlib.image.imsave(os.path.join(test_case_dir, "sw_res.png"), sw_res.numpy().reshape(num_frames, num_mels))
         matplotlib.image.imsave(os.path.join(test_case_dir, "hw_res.png"), hw_res.reshape(num_frames, num_mels))
         preproc_circuit.package(directory=test_case_dir)
+        subprocess.run(["vivado", "-mode", "batch", "-source", "synth.tcl", "-tclargs", test_case_dir], capture_output=True) 
 
 if __name__ == "__main__":
     main()
