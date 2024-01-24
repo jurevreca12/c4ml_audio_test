@@ -4,3 +4,4 @@ tests/
 *.zip
 *.jou
 *.log
+vis/

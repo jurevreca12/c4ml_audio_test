@@ -6,6 +6,6 @@ Run the following commands to recreate the results.
 	cd chisel4ml
 	pip install -ve .[dev]
 	cd ..
-	python train.py
-	make all
+	python run_tests.py
+	python visualize.py
 ```
