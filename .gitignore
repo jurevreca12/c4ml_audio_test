@@ -5,3 +5,4 @@ tests/
 *.jou
 *.log
 vis/
+tests_vis/
