@@ -3,19 +3,17 @@ import os
 
 def get_main_table(results):
     latex_str = "\\hline\n"
-    latex_str += "Parameterizacija & LUT & FF & BRAM18 & DSP & URA [ns] & CIKLI & Frek [MHz] & Pretok [Mvzorci/s] \\\\\n"
+    latex_str += "Parameterization & LUT & FF & DSP & CYCLES & Throughput [Msamples/s] & Dynamic Power [W] \\\\\n"
     latex_str += "\\hline\n"
     clr = "\\clr" 
     for _, row in results.iterrows():
         latex_str += f"({int(row['frame_length'])}, {int(row['num_frames'])}, {int(row['num_mels'])}){clr} & \
  {int(row['total_luts'])}{clr} & \
  {int(row['total_ff'])}{clr} & \
- {int(row['total_ramb18'])}{clr} & \
  {int(row['total_dsp'])}{clr} & \
- {row['max_clock_ns']:.02f}{clr} &\
  {int(row['consumed_cycles'])}{clr} & \
- {row['max_freq_mhz']:.02f}{clr} & \
- {row['max_throughput_msamples_sec']:.02f}{clr} \\\\\n" 
+ {row['max_throughput_msamples_sec']:.02f}{clr}& \
+ {row['dynamic_power']:.03f}{clr}\\\\\n" 
         if clr == "\\clr":
             clr = ""
         else:
