@@ -49,20 +49,21 @@ def main():
     tests_dir = os.path.join(script_dir, "tests")
     os.makedirs(tests_dir)
     m = Manager()
-    port_var = m.list([0])
+    server_index_queue = m.Queue(maxsize = NUM_PROCESSES) 
+    for i in range(NUM_PROCESSES):
+        server_index_queue.put(i)
     pool = Pool(processes=NUM_PROCESSES)
-    partial_fn = partial(run_test_case, port_var)
-    results = pool.map(partial_fn, itertools.product(*test_config.values()))
+    partial_fn = partial(run_test_case, server_index_queue)
+    results = pool.imap(partial_fn, itertools.product(*test_config.values()))
+    # for test_case in itertools.product(*test_config.values()):
+    #     partial_fn(test_case)
     for result in results:
         results_df.loc[results_df.index.size] = result
     results_df.to_csv("results.csv")
 
-def run_test_case(port_var, test_case):
+def run_test_case(server_index_queue, test_case):
     global test_config
     global tests_dir
-    c4ml_port = 50000 + port_var[0]
-    c4ml_dir = f"/tmp/.chisel4ml{port_var[0]}"
-    port_var[0] = (port_var[0] + 1) % 4
     tcdict = dict(zip(test_config.keys(), test_case))
     frame_length = int(tcdict["frame_length"])
     num_frames = int(tcdict["num_frames"])
@@ -97,8 +98,11 @@ ________________________________________________________________________________
             )
         )
     )
-    server = connect_to_server(temp_dir = c4ml_dir, port = c4ml_port)
 
+    index = server_index_queue.get(block=True)
+    c4ml_dir = f"/tmp/.chisel4ml{index}"
+    c4ml_port = 50000 + index
+    server = connect_to_server(c4ml_dir, c4ml_port)
     preproc_circuit = generate.circuit(
         opt_model=preproc_model,
         use_verilator=True,
@@ -121,6 +125,7 @@ ________________________________________________________________________________
     )
     test_results['consumed_cycles'] = preproc_circuit.consumed_cycles
     preproc_circuit.delete_from_server()
+    server_index_queue.put(index, block=True)
     test_case_dir = os.path.join(tests_dir, f"frame_length_{frame_length}_num_frames_{num_frames}_num_mels_{num_mels}")
     os.makedirs(test_case_dir)
     matplotlib.image.imsave(os.path.join(test_case_dir, "sw_res.png"), sw_res.numpy().reshape(num_frames, num_mels))
